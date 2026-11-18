@@ -1,4 +1,4 @@
-const C = "financespro-v1";
+const C = "financespro-v2";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { self.skipWaiting(); e.waitUntil(caches.open(C).then(c => c.addAll(FILES))); });
 self.addEventListener("activate", e => e.waitUntil(
