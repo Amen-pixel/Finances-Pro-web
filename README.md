@@ -61,7 +61,7 @@ L'application s'ouvre ensuite en plein écran, avec son icône « FP ».
 
 ### Analyse et visualisation
 
-Huit onglets par projet :
+Huit rubriques par projet, chacune sur sa **propre page plein écran** :
 
 | Onglet | Ce qu'il apporte |
 |---|---|
@@ -71,7 +71,7 @@ Huit onglets par projet :
 | **Répartition** | Diagramme circulaire par catégorie, avec légende et pourcentages |
 | **Mensuel** | Revenus, dépenses et épargne sur les 12 derniers mois, avec le net de chaque mois |
 | **Analyse** | Score de santé, dépense moyenne par jour, prévision de fin de mois, plus grosse dépense, catégorie dominante, conseils automatiques |
-| **Objectifs** | Simulateur : temps nécessaire selon votre rythme d'épargne, ou épargne mensuelle à prévoir pour un délai donné |
+| **Objectifs** | Deux calculateurs : pour l'objectif du projet et pour un achat libre. Choisissez de cotiser par jour, semaine, mois ou an pour connaître la durée et la date, ou fixez un délai pour connaître le montant à cotiser |
 | **Réglages du projet** | Nom, budget mensuel, objectif d'épargne, suppression du projet |
 
 ### Rapport, sécurité et confort

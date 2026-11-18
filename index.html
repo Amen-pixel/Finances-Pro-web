@@ -2,7 +2,7 @@
 <html lang="fr" data-t="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Finances Pro</title>
 <meta name="description" content="Gérez vos finances projet par projet : revenus, dépenses, épargne.">
 <meta name="theme-color" content="#06060c">
@@ -13,13 +13,13 @@
 :root{--bg:#06060c;--bg2:#180824;--pn:#10101a;--ln:#2d3350;--tx:#fff;--t2:#d2dcfa;--in:#1e2030;--tr:#262636;--sur:#000;--g:#00ff8c;--b:#00b4ff;--p:#c83cff;--o:#ff9600;--r:#ff2864;--y:#ffdc00}
 :root[data-t=light]{--bg:#e9edf5;--bg2:#d4def1;--pn:#fff;--ln:#b9c3d7;--tx:#121e3c;--t2:#505c78;--in:#f0f3f9;--tr:#dee4f0;--sur:#fff;--g:#1e8c5a;--b:#195fb9;--p:#5f4b96;--o:#cd7d19;--r:#be323c;--y:#b48c0a}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;font:15px/1.4 "Segoe UI",system-ui,sans-serif;color:var(--tx);background:linear-gradient(var(--bg),var(--bg2)) fixed;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+body{margin:0;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;touch-action:pan-x pan-y;-webkit-user-select:none;user-select:none;min-height:100vh;font:15px/1.4 "Segoe UI",system-ui,sans-serif;color:var(--tx);background:linear-gradient(var(--bg),var(--bg2)) fixed;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 .w{max-width:1100px;margin:0 auto;padding:16px}
 h1{font-size:clamp(30px,8vw,56px);margin:8px 0;text-align:center;background:linear-gradient(90deg,var(--b),var(--p),var(--r));-webkit-background-clip:text;background-clip:text;color:transparent}
 h3{margin:0 0 6px}
 .sub{text-align:center;color:var(--t2);margin:0 0 14px}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:14px}
-input,select,button{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--ln);border-radius:8px;padding:10px 12px;min-height:42px}
+input,select,button{font:inherit;font-size:16px;color:var(--tx);background:var(--in);border:1px solid var(--ln);border-radius:8px;padding:10px 12px;min-height:42px}
 input,select{width:100%}
 .row input,.row select{width:auto;flex:1 1 140px}
 button{cursor:pointer;font-weight:700}
@@ -40,17 +40,18 @@ button{cursor:pointer;font-weight:700}
 .wt{overflow-x:auto}
 table{width:100%;border-collapse:collapse}
 th,td{padding:8px;text-align:left;border-bottom:1px solid var(--ln);white-space:nowrap}
-.cat{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+.cat{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:8px;align-items:center;font-size:15px;margin:6px 0}
 label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px}
 .m{color:var(--t2)}
 .top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--pn);border:1px solid var(--g);padding:10px 16px;border-radius:10px;z-index:9}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
 .top h2{font-size:18px}
-@media(max-width:480px){.cat{font-size:12px}.big{font-size:20px}.w{padding:10px}}
+@media(max-width:480px){.cat{font-size:14px}.big{font-size:20px}.w{padding:10px}}
 .new{border:3px dashed var(--g);display:grid;place-items:center;text-align:center;min-height:190px;cursor:pointer;background:rgba(0,255,140,.07)}.pl{font-size:56px;line-height:1;color:var(--g);font-weight:700}
 .ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:grid;place-items:center;padding:12px;z-index:8}.md{background:var(--pn);border:2px solid var(--ln);border-radius:14px;padding:16px;width:100%;max-width:440px;max-height:90vh;overflow:auto}
 @media print{body{background:#fff}.tabs,.top button,.row,.toast,button{display:none!important}}
+input{-webkit-user-select:text;user-select:text}.res{color:var(--g);font-weight:700;line-height:1.5}
 </style>
 </head>
 <body>
@@ -118,7 +119,7 @@ function vProjet(p) {
     const rows = Object.entries(g).sort((a, b) => b[1] - a[1]), max = rows.length ? rows[0][1] : 0;
     const cats = rows.map(([c, v], i) => `<div class="cat"><span>${esc(c)}</span>${bar(v, max, "var(--" + COUL[i % 6] + ")")}<b>${fm(v)}</b></div>`).join("") || '<p class="m">Aucune dépense enregistrée.</p>';
     const taux = t.rev > 0 ? Math.round(t.epa / t.rev * 100) : 0;
-    body = `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))">
+    body = `<div class="grid">${tiles}</div><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))">
       <div class="c"><h3>Nouvelle opération</h3>
         <label>Description</label><input id="o-d" maxlength="80">
         <label>Montant (FCFA)</label><input id="o-m" inputmode="decimal">
@@ -151,12 +152,18 @@ function vProjet(p) {
       <label>Objectif d’épargne (FCFA, 0 = aucun)</label><input id="r-o" inputmode="decimal" value="${p.objectif || 0}">
       <p><button class="pri" data-a="setp">Enregistrer</button> <button class="dg" data-a="delp" data-v="${p.id}">Supprimer ce projet</button></p></div>`;
   }
-  return `<div class="top"><button data-a="home">Accueil</button><h2 style="margin:0;color:${col}">${esc(p.nom)}</h2><button data-a="theme">${D.theme === "dark" ? "Thème clair" : "Thème sombre"}</button><button class="pri" data-a="print">Rapport (PDF)</button></div>
-    <div class="grid">${tiles}</div><div class="tabs">${tabs}</div>${body}`;
+  if (!tab) return `<div class="top"><button data-a="home">← Accueil</button><h2 style="margin:0;color:${col}">${esc(p.nom)}</h2><button data-a="theme">${D.theme === "dark" ? "Thème clair" : "Thème sombre"}</button></div>
+    <div class="grid">${tiles}</div>
+    <div class="grid">${SEC.map(([k, l, d, c]) => `<div class="c card" style="--col:var(--${c})" data-a="tab" data-v="${k}"><b style="font-size:19px">${l}</b><div class="m">${d}</div></div>`).join("")}</div>
+    <p><button class="pri" data-a="print">Rapport (PDF)</button></p>`;
+  const S = SEC.find(x => x[0] === tab);
+  return `<div class="top"><button data-a="tab" data-v="">← ${esc(p.nom)}</button><h2 style="margin:0">${S[1]}</h2></div>${body}`;
 }
 
 function render() {
   document.documentElement.dataset.t = D.theme;
+  const vw = typeof innerWidth === "number" ? innerWidth : 600, vh = typeof innerHeight === "number" ? innerHeight : 800;
+  W = Math.max(300, Math.min(900, vw - 40)); H = Math.max(260, Math.min(480, Math.round(vh * .55)));
   const p = D.projets.find(x => x.id === cur);
   if (!p) cur = null;
   $("#app").innerHTML = locked ? vLock() : p ? vProjet(p) : vHome();
@@ -169,14 +176,14 @@ const sha = async s => [...new Uint8Array(await crypto.subtle.digest("SHA-256", 
 const vLock = () => `<div class="c" style="max-width:420px;margin:16vh auto;text-align:center"><h1 style="font-size:34px">FINANCES PRO</h1><h3>Espace verrouillé</h3><input id="pin" type="password" inputmode="numeric" autocomplete="off" placeholder="Code PIN"><p><button class="pri" style="width:100%" data-a="unlock">Déverrouiller</button></p></div>`;
 const tsel = (id, v) => `<select id="${id}" style="width:auto">${Object.entries(TYPES).map(([k, x]) => `<option value="${k}"${k === v ? " selected" : ""}>${x[0]}</option>`).join("")}</select>`;
 const dot = c => `<span class="dot" style="background:var(--${c})"></span>`;
-const W = 600, H = 220;
+let W = 600, H = 220;
 
 function vCou(p) {
   const L = p.ops.filter(o => o.type === cvT).sort((a, b) => a.date.localeCompare(b.date));
   let c = 0; const pts = L.map(o => [o.date, cvC ? (c += o.montant) : o.montant]);
   const n = pts.length, max = Math.max(1, ...pts.map(q => q[1])), col = "var(--" + TYPES[cvT][1] + ")";
   const xy = pts.map((q, i) => [40 + (n > 1 ? i / (n - 1) : .5) * (W - 70), H - 34 - q[1] / max * (H - 70)]);
-  const svg = n ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><line x1="40" y1="${H - 34}" x2="${W - 10}" y2="${H - 34}" stroke="var(--ln)"/><polyline fill="none" stroke="${col}" stroke-width="3" points="${xy.map(q => q.join(",")).join(" ")}"/>${xy.map((q, i) => `<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="var(--pn)" stroke="${col}" stroke-width="3"/><text x="${q[0]}" y="${q[1] - 10}" text-anchor="middle" font-size="11" fill="var(--tx)">${Math.round(pts[i][1]).toLocaleString("fr-FR")}</text>`).join("")}<text x="40" y="${H - 14}" font-size="10" fill="var(--t2)">${pts[0][0]}</text><text x="${W - 10}" y="${H - 14}" font-size="10" text-anchor="end" fill="var(--t2)">${pts[n - 1][0]}</text></svg><div class="m">Total : ${fm(L.reduce((s, o) => s + o.montant, 0))} · Moyenne : ${fm(L.reduce((s, o) => s + o.montant, 0) / n)} · Opérations : ${n}</div>` : '<p class="m">Aucune opération de ce type.</p>';
+  const svg = n ? `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><line x1="40" y1="${H - 34}" x2="${W - 10}" y2="${H - 34}" stroke="var(--ln)"/><polyline fill="none" stroke="${col}" stroke-width="3" points="${xy.map(q => q.join(",")).join(" ")}"/>${xy.map((q, i) => `<circle cx="${q[0]}" cy="${q[1]}" r="5" fill="var(--pn)" stroke="${col}" stroke-width="3"/><text x="${q[0]}" y="${q[1] - 10}" text-anchor="middle" font-size="13" fill="var(--tx)">${Math.round(pts[i][1]).toLocaleString("fr-FR")}</text>`).join("")}<text x="40" y="${H - 14}" font-size="12" fill="var(--t2)">${pts[0][0]}</text><text x="${W - 10}" y="${H - 14}" font-size="12" text-anchor="end" fill="var(--t2)">${pts[n - 1][0]}</text></svg><div class="m">Total : ${fm(L.reduce((s, o) => s + o.montant, 0))} · Moyenne : ${fm(L.reduce((s, o) => s + o.montant, 0) / n)} · Opérations : ${n}</div>` : '<p class="m">Aucune opération de ce type.</p>';
   return `<div class="c"><div class="row" style="justify-content:flex-start">${tsel("cvt", cvT)}<label style="margin:0"><input type="checkbox" id="cvc" style="width:auto;min-height:0"${cvC ? " checked" : ""}> Cumulé</label></div><h3>Évolution chronologique : ${TYPES[cvT][0]}</h3>${svg}</div>`;
 }
 
@@ -185,15 +192,16 @@ function vRep(p) {
   const rows = Object.entries(g).sort((a, b) => b[1] - a[1]), T = rows.reduce((s, r) => s + r[1], 0), C = 2 * Math.PI * 70; let off = 0;
   const arcs = rows.map(([k, v], i) => { const l = v / T * C, a = `<circle r="70" cx="100" cy="100" fill="none" stroke="var(--${COUL[i % 6]})" stroke-width="36" stroke-dasharray="${l} ${C - l}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`; off += l; return a; }).join("");
   const leg = rows.map(([k, v], i) => `<div class="cat" style="grid-template-columns:1fr auto"><span>${dot(COUL[i % 6])}${esc(k)}</span><b>${fm(v)} (${Math.round(v / T * 100)} %)</b></div>`).join("");
-  return `<div class="c"><div class="row" style="justify-content:flex-start"><b>Répartition par catégorie, type :</b>${tsel("rpt", rpT)}</div>${T ? `<div class="grid" style="align-items:center"><svg viewBox="0 0 200 200" style="width:100%;max-width:260px;margin:auto">${arcs}<text x="100" y="96" text-anchor="middle" font-size="11" fill="var(--t2)">TOTAL</text><text x="100" y="114" text-anchor="middle" font-size="15" font-weight="700" fill="var(--tx)">${Math.round(T).toLocaleString("fr-FR")}</text></svg><div>${leg}</div></div>` : '<p class="m">Aucune opération de ce type.</p>'}</div>`;
+  return `<div class="c"><div class="row" style="justify-content:flex-start"><b>Répartition par catégorie, type :</b>${tsel("rpt", rpT)}</div>${T ? `<div class="grid" style="align-items:center"><svg viewBox="0 0 200 200" style="width:100%;max-width:340px;margin:auto">${arcs}<text x="100" y="96" text-anchor="middle" font-size="13" fill="var(--t2)">TOTAL</text><text x="100" y="114" text-anchor="middle" font-size="20" font-weight="700" fill="var(--tx)">${Math.round(T).toLocaleString("fr-FR")}</text></svg><div>${leg}</div></div>` : '<p class="m">Aucune opération de ce type.</p>'}</div>`;
 }
 
 function vMen(p) {
+  W = Math.max(W, 720);
   const n = new Date(), ms = [];
   for (let i = 11; i >= 0; i--) { const d = new Date(n.getFullYear(), n.getMonth() - i, 1); ms.push(d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")); }
   const S = ms.map(m => tot(p.ops.filter(o => o.date.startsWith(m)))), max = Math.max(1, ...S.flatMap(t => [t.rev, t.dep, t.epa])), bw = (W - 50) / 12;
-  const bars = S.map((t, i) => ["rev", "dep", "epa"].map((k, j) => { const h = t[k] / max * (H - 70); return `<rect x="${42 + i * bw + j * bw / 3.4}" y="${H - 34 - h}" width="${bw / 3.6}" height="${h}" fill="var(--${TYPES[k][1]})"/>`; }).join("") + `<text x="${42 + i * bw + bw / 2.4}" y="${H - 18}" text-anchor="middle" font-size="9" fill="var(--t2)">${ms[i].slice(5)}/${ms[i].slice(2, 4)}</text><text x="${42 + i * bw + bw / 2.4}" y="${H - 6}" text-anchor="middle" font-size="8" fill="var(--${t.reste >= 0 ? "g" : "r"})">${t.reste ? Math.round(t.reste / 1000) + "k" : ""}</text>`).join("");
-  return `<div class="c"><h3>Comparaison mensuelle (12 derniers mois)</h3><div class="m">${dot("g")}Revenus ${dot("r")}Dépenses ${dot("b")}Épargne · sous chaque mois : net = revenus − dépenses − épargne</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><line x1="40" y1="${H - 34}" x2="${W - 8}" y2="${H - 34}" stroke="var(--ln)"/>${bars}</svg></div>`;
+  const bars = S.map((t, i) => ["rev", "dep", "epa"].map((k, j) => { const h = t[k] / max * (H - 70); return `<rect x="${42 + i * bw + j * bw / 3.4}" y="${H - 34 - h}" width="${bw / 3.6}" height="${h}" fill="var(--${TYPES[k][1]})"/>`; }).join("") + `<text x="${42 + i * bw + bw / 2.4}" y="${H - 18}" text-anchor="middle" font-size="11" fill="var(--t2)">${ms[i].slice(5)}/${ms[i].slice(2, 4)}</text><text x="${42 + i * bw + bw / 2.4}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--${t.reste >= 0 ? "g" : "r"})">${t.reste ? Math.round(t.reste / 1000) + "k" : ""}</text>`).join("");
+  return `<div class="c"><h3>Comparaison mensuelle (12 derniers mois)</h3><div class="m">${dot("g")}Revenus ${dot("r")}Dépenses ${dot("b")}Épargne · sous chaque mois : net = revenus − dépenses − épargne</div><div class="wt"><svg viewBox="0 0 ${W} ${H}" style="width:${W}px;max-width:none;height:auto"><line x1="40" y1="${H - 34}" x2="${W - 8}" y2="${H - 34}" stroke="var(--ln)"/>${bars}</svg></div></div>`;
 }
 
 function vAna(p) {
@@ -212,13 +220,23 @@ function vAna(p) {
   return `<div class="c"><h3>Analyse intelligente du projet</h3><div class="grid">${T.map(([l, v, c]) => `<div class="c t" style="--col:var(--${c})"><div class="lb">${l}</div><div class="big" style="font-size:17px;white-space:normal">${esc(v)}</div></div>`).join("")}</div><h3 style="color:var(--y)">Conseils automatiques</h3>${tips.map(x => `<p>• ${x}</p>`).join("")}</div>`;
 }
 
+const SEC = [["tdb", "Tableau de bord", "Saisir une opération, dépenses par catégorie", "g"], ["his", "Historique", "Toutes les opérations, filtre et export CSV", "b"], ["cou", "Courbe", "Évolution dans le temps", "p"], ["rep", "Répartition", "Diagramme par catégorie", "o"], ["men", "Mensuel", "Comparaison des 12 derniers mois", "y"], ["ana", "Analyse", "Score, prévisions et conseils", "r"], ["obj", "Objectifs", "Calculer la durée ou le montant à cotiser", "g"], ["reg", "Réglages du projet", "Nom, type, couleur, budget, objectif", "p"]];
+const UP = ["jour", "semaine", "mois", "an"], UD = ["jours", "semaines", "mois", "ans"], UJ = [1, 7, 30.4375, 365.25];
+const so = (id, L, d) => `<select id="${id}">${L.map((x, i) => `<option value="${i}"${i === d ? " selected" : ""}>${x}</option>`).join("")}</select>`;
+const calc = k => `<label>Je peux cotiser (FCFA)</label><input id="${k}-m" inputmode="decimal" placeholder="Ex. : 2000">
+  <label>par</label>${so(k + "-u", UP, 0)}
+  <p><button class="pri" style="width:100%" data-a="cA" data-v="${k}">Calculer la durée</button></p><p class="res" id="${k}-r1"></p>
+  <label>Ou : je veux y arriver en</label><div class="row" style="margin:0"><input id="${k}-d" inputmode="numeric" placeholder="Ex. : 12" style="flex:1 1 90px">${so(k + "-v", UD, 2)}</div>
+  <p><button style="width:100%;background:var(--b);color:var(--sur)" data-a="cB" data-v="${k}">Calculer ce qu’il faut cotiser</button></p><p class="res" id="${k}-r2" style="color:var(--b)"></p>`;
 function vObj(p) {
-  const t = tot(p.ops), o = p.objectif || 0, pc = o > 0 ? Math.round(Math.min(100, t.epa / o * 100)) : 0;
-  return `<div class="c"><h3 style="color:var(--b)">Simulateur d’objectifs et projection</h3>${bar(t.epa, o, "var(--p)")}<div class="m">${o > 0 ? pc + " % de l’objectif (" + fm(t.epa) + " / " + fm(o) + ")" : "Aucun objectif : définissez-le dans « Réglages du projet »."}</div>
-  <p><button class="pri" data-a="sim1">Calculer le temps nécessaire selon mon rythme d’épargne</button></p><p id="r1" style="color:var(--g);font-weight:700"></p>
-  <label>En combien de mois voulez-vous y arriver ?</label><input id="s-m" inputmode="numeric" value="12">
-  <p><button style="background:var(--b);color:var(--sur)" data-a="sim2">Calculer l’épargne mensuelle nécessaire</button></p><p id="r2" style="color:var(--b);font-weight:700"></p></div>`;
+  const t = tot(p.ops), o = p.objectif || 0;
+  return `<div class="c"><h3 style="color:var(--b)">Objectif du projet</h3>${bar(t.epa, o, "var(--p)")}<div class="m">${o > 0 ? Math.round(Math.min(100, t.epa / o * 100)) + " % de l’objectif (" + fm(t.epa) + " / " + fm(o) + ")" : "Aucun objectif : définissez-le dans « Réglages du projet »."}</div>${o > t.epa ? `<p>Reste à épargner : <b>${fm(o - t.epa)}</b></p>` : ""}${calc("a")}</div>
+  <div class="c" style="margin-top:14px"><h3 style="color:var(--y)">Estimer un achat ou un projet libre</h3><p class="m">Indépendant de l’objectif du projet : entrez simplement le prix.</p>
+  <label>Prix de ce que vous voulez payer (FCFA)</label><input id="b-p" inputmode="decimal" placeholder="Ex. : 500 000">${calc("b")}</div>`;
 }
+const tg = k => { const p = proj(); return k === "a" ? Math.max(0, (p.objectif || 0) - tot(p.ops).epa) : (num($("#b-p").value) || 0); };
+const dur = d => { if (d < 60) return Math.ceil(d) + " jour(s)"; const m = Math.round(d / 30.4375), y = Math.floor(m / 12), r = m % 12; return y < 2 ? m + " mois" : y + " ans" + (r ? " et " + r + " mois" : ""); };
+const cible = (k, r) => { const T = tg(k); if (T > 0) return T; r.textContent = k === "a" ? (proj().objectif > 0 ? "Objectif déjà atteint !" : "Définissez d’abord un objectif dans « Réglages du projet ».") : "Entrez d’abord le prix à payer."; return 0; };
 
 const A = {
   unlock: async () => { if (await sha($("#pin").value) === D.pin) { locked = false; render(); } else toast("Code incorrect"); },
@@ -231,24 +249,22 @@ const A = {
   },
   lock: () => { locked = true; render(); },
   print: () => { const t = D.theme; document.documentElement.dataset.t = "light"; window.print(); document.documentElement.dataset.t = t; },
-  sim1: () => {
-    const p = proj(), t = tot(p.ops), o = p.objectif || 0, r = $("#r1");
-    if (!(o > 0)) { r.textContent = "Définissez d’abord un objectif d’épargne."; return; }
-    if (t.epa >= o) { r.textContent = "Objectif atteint ! Vous avez déjà " + fm(t.epa) + " d’épargne."; return; }
-    const ds = p.ops.filter(x => x.type === "epa").map(x => x.date).sort();
-    if (!ds.length) { r.textContent = "Aucune épargne enregistrée pour estimer votre rythme."; return; }
-    const a = new Date(ds[0]), n = new Date(), mois = Math.max(1, (n.getFullYear() - a.getFullYear()) * 12 + n.getMonth() - a.getMonth() + 1), ry = t.epa / mois;
-    r.textContent = "À ce rythme (" + fm(ry) + " par mois), objectif atteint dans environ " + Math.ceil((o - t.epa) / ry) + " mois.";
+  cA: k => {
+    const r = $("#" + k + "-r1"), T = cible(k, r); if (!T) return;
+    const m = num($("#" + k + "-m").value), u = +$("#" + k + "-u").value;
+    if (!(m > 0)) { r.textContent = "Entrez le montant que vous pouvez cotiser."; return; }
+    const n = Math.ceil(T / m), d = n * UJ[u], dt = new Date(Date.now() + d * 864e5).toLocaleDateString("fr-FR", {day: "numeric", month: "long", year: "numeric"});
+    r.textContent = "En cotisant " + fm(m) + " par " + UP[u] + ", il faudra " + n + " " + (UP[u] === "mois" ? "mois" : UP[u] + (n > 1 ? "s" : "")) + " (environ " + dur(d) + "). Date estimée : " + dt + ".";
   },
-  sim2: () => {
-    const p = proj(), t = tot(p.ops), o = p.objectif || 0, m = parseInt($("#s-m").value), r = $("#r2");
-    if (!(o > 0)) { r.textContent = "Définissez d’abord un objectif d’épargne."; return; }
-    if (!(m > 0)) { r.textContent = "Entrez un nombre de mois valide."; return; }
-    r.textContent = o - t.epa <= 0 ? "Objectif déjà atteint !" : "Il faut épargner environ " + fm((o - t.epa) / m) + " par mois pendant " + m + " mois.";
+  cB: k => {
+    const r = $("#" + k + "-r2"), T = cible(k, r); if (!T) return;
+    const n = num($("#" + k + "-d").value), v = +$("#" + k + "-v").value, d = n * UJ[v];
+    if (!(d >= 1)) { r.textContent = "Entrez une durée valide."; return; }
+    r.textContent = "Pour atteindre " + fm(T) + " en " + n + " " + (n === 1 ? UP[v] : UD[v]) + " : " + UP.map((l, i) => [l, UJ[i]]).filter(x => d >= x[1]).map(x => fm(Math.ceil(T / d * x[1])) + " par " + x[0]).join(" · ") + ".";
   },
-  open: v => { cur = v; tab = "tdb"; flt = ""; render(); scrollTo(0, 0); },
+  open: v => { cur = v; tab = ""; flt = ""; render(); scrollTo(0, 0); },
   home: () => { cur = null; render(); },
-  tab: v => { tab = v; render(); },
+  tab: v => { tab = v; render(); scrollTo(0, 0); },
   theme: () => { D.theme = D.theme === "dark" ? "light" : "dark"; save(); render(); },
   flt: () => { flt = $("#fl").value; render(); },
   newp: () => modal(`<h3>Nouveau projet</h3>
@@ -329,6 +345,7 @@ document.addEventListener("change", e => {
 });
 document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id === "pin") A.unlock(); if (e.key === "Enter" && e.target.id === "np-n") A.newp2(); });
 document.addEventListener("input", e => { if (e.target.id === "q") { Q = e.target.value; $("#g").innerHTML = cards(); } });
+document.addEventListener("gesturestart", e => e.preventDefault());
 render();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
