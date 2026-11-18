@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr" data-t="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Finances Pro</title>
+<meta name="description" content="Gérez vos finances projet par projet : revenus, dépenses, épargne.">
+<meta name="theme-color" content="#06060c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#06060c;--bg2:#180824;--pn:#10101a;--ln:#2d3350;--tx:#fff;--t2:#d2dcfa;--in:#1e2030;--tr:#262636;--sur:#000;--g:#00ff8c;--b:#00b4ff;--p:#c83cff;--o:#ff9600;--r:#ff2864;--y:#ffdc00}
+:root[data-t=light]{--bg:#e9edf5;--bg2:#d4def1;--pn:#fff;--ln:#b9c3d7;--tx:#121e3c;--t2:#505c78;--in:#f0f3f9;--tr:#dee4f0;--sur:#fff;--g:#1e8c5a;--b:#195fb9;--p:#5f4b96;--o:#cd7d19;--r:#be323c;--y:#b48c0a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font:15px/1.4 "Segoe UI",system-ui,sans-serif;color:var(--tx);background:linear-gradient(var(--bg),var(--bg2)) fixed;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.w{max-width:1100px;margin:0 auto;padding:16px}
+h1{font-size:clamp(30px,8vw,56px);margin:8px 0;text-align:center;background:linear-gradient(90deg,var(--b),var(--p),var(--r));-webkit-background-clip:text;background-clip:text;color:transparent}
+h3{margin:0 0 6px}
+.sub{text-align:center;color:var(--t2);margin:0 0 14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-bottom:14px}
+input,select,button{font:inherit;color:var(--tx);background:var(--in);border:1px solid var(--ln);border-radius:8px;padding:10px 12px;min-height:42px}
+input,select{width:100%}
+.row input,.row select{width:auto;flex:1 1 140px}
+button{cursor:pointer;font-weight:700}
+.pri{background:var(--g);color:var(--sur);border-color:var(--g)}
+.dg{background:var(--r);color:var(--sur);border-color:var(--r)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-bottom:14px}
+.c{background:var(--pn);border:2px solid var(--ln);border-radius:14px;padding:14px;position:relative}
+.t,.card{border-color:var(--col)}
+.card{cursor:pointer}
+.card .x{position:absolute;top:8px;right:8px;min-height:32px;padding:4px 10px}
+.bd{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--col);color:var(--sur);font-weight:800;font-size:20px;margin-right:10px;vertical-align:middle}
+.lb{font-size:12px;font-weight:700;text-transform:uppercase;color:var(--t2)}
+.big{font-size:24px;font-weight:800}
+.bar{height:12px;border-radius:6px;background:var(--tr);overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:var(--col,var(--g))}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button.on{background:var(--p);color:var(--sur);border-color:var(--p)}
+.wt{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:8px;text-align:left;border-bottom:1px solid var(--ln);white-space:nowrap}
+.cat{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:8px;align-items:center;font-size:13px;margin:6px 0}
+label{display:block;font-size:13px;font-weight:700;margin:10px 0 4px}
+.m{color:var(--t2)}
+.top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--pn);border:1px solid var(--g);padding:10px 16px;border-radius:10px;z-index:9}
+</style>
+</head>
+<body>
+<div class="w" id="app"></div>
+<script>
+const $ = s => document.querySelector(s);
+const CATS = ["Bourse / Salaire","Projet Tech / Freelance","Alimentation","Transport","Internet & Électricité","Fonds d’Urgence","Loyer","Santé","Loisirs","Éducation","Autre"];
+const TYPES = {rev:["Revenu","g"], dep:["Dépense","r"], epa:["Épargne","b"]};
+const COUL = ["g","b","p","o","r","y"], NCOUL = ["Vert","Bleu","Violet","Orange","Rouge","Jaune"];
+const KINDS = ["Épargne","Objectif","Maison","Voiture","Études","Informatique","Voyage","Courses","Téléphone","Cadeau","Santé","Croissance"];
+let D = null;
+try { D = JSON.parse(localStorage.getItem("financespro")); } catch (e) {}
+D = D || {theme:"dark", projets:[]};
+let cur = null, tab = "tdb", flt = "";
+const save = () => { try { localStorage.setItem("financespro", JSON.stringify(D)); } catch (e) { toast("Enregistrement impossible"); } };
+const fm = n => Math.round(n).toLocaleString("fr-FR") + " FCFA";
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const today = () => new Date().toISOString().slice(0, 10);
+const num = v => parseFloat(String(v).replace(/\s/g, "").replace(",", "."));
+const tot = ops => { const t = {rev:0, dep:0, epa:0}; ops.forEach(o => t[o.type] += o.montant); t.reste = t.rev - t.dep - t.epa; return t; };
+const bar = (v, max, col) => `<div class="bar"><i style="width:${max > 0 ? Math.min(100, Math.max(0, v / max * 100)) : 0}%;${col ? "--col:" + col : ""}"></div>`;
+const opt = (list, sel) => list.map((x, i) => `<option value="${i}"${i === sel ? " selected" : ""}>${esc(x)}</option>`).join("");
+function toast(m) { const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.append(t); setTimeout(() => t.remove(), 2400); }
+
+function vHome() {
+  const all = tot(D.projets.flatMap(p => p.ops));
+  const cards = D.projets.map(p => {
+    const t = tot(p.ops), col = "var(--" + COUL[p.couleur] + ")";
+    return `<div class="c card" style="--col:${col}" data-a="open" data-v="${p.id}">
+      <button class="x dg" data-a="delp" data-v="${p.id}" aria-label="Supprimer le projet">X</button>
+      <div><span class="bd">${esc(p.nom.charAt(0).toUpperCase())}</span><b style="font-size:19px">${esc(p.nom)}</b></div>
+      <div class="m">${esc(p.type)} · ${p.ops.length} opération(s)</div>
+      <div class="lb" style="margin-top:10px">Reste à vivre</div><div class="big" style="color:var(--g)">${fm(t.reste)}</div>
+      ${bar(t.epa, p.objectif, col)}
+      <div class="m" style="font-size:13px">${p.objectif > 0 ? "Objectif : " + Math.round(Math.min(100, t.epa / p.objectif * 100)) + " % de " + p.objectif.toLocaleString("fr-FR") : "Aucun objectif défini"}</div></div>`;
+  }).join("");
+  const tiles = [["Revenus cumulés", all.rev, "g"], ["Dépenses cumulées", all.dep, "r"], ["Épargne cumulée", all.epa, "b"], ["Solde global", all.reste, "p"]]
+    .map(([l, v, c]) => `<div class="c t" style="--col:var(--${c})"><div class="lb">${l}</div><div class="big">${fm(v)}</div></div>`).join("");
+  return `<h1>FINANCES PRO</h1>
+  <p class="sub">Un dossier par projet : revenus, dépenses, épargne… tout au même endroit.</p>
+  <div class="row"><input id="np-n" placeholder="Nom du projet" maxlength="40">
+    <select id="np-t">${opt(KINDS, 0)}</select><select id="np-c">${opt(NCOUL, 0)}</select>
+    <button class="pri" data-a="newp">NOUVEAU PROJET</button></div>
+  <div class="row"><button data-a="theme">${D.theme === "dark" ? "Thème clair" : "Thème sombre"}</button>
+    <button data-a="bak">Sauvegarde</button><button data-a="rst">Restaurer</button>
+    <input id="rf" type="file" accept=".json" hidden></div>
+  <div class="grid">${cards || '<div class="c m">Aucun projet pour le moment. Créez votre premier projet ci-dessus.</div>'}</div>
+  <div class="grid">${tiles}</div>
+  <p class="m" style="text-align:center;font-size:13px">Vos données restent sur cet appareil. Pensez à utiliser « Sauvegarde » de temps en temps.</p>`;
+}
+
+function vProjet(p) {
+  const t = tot(p.ops), ym = today().slice(0, 7), col = "var(--" + COUL[p.couleur] + ")";
+  const depM = p.ops.filter(o => o.type === "dep" && o.date.startsWith(ym)).reduce((s, o) => s + o.montant, 0);
+  const tiles = [["Revenus totaux (+)", t.rev, "g"], ["Dépenses totales (−)", t.dep, "r"], ["Épargne placée", t.epa, "b"], ["Reste à vivre", t.reste, "p"]]
+    .map(([l, v, c]) => `<div class="c t" style="--col:var(--${c})"><div class="lb">${l}</div><div class="big">${fm(v)}</div></div>`).join("");
+  const tabs = [["tdb", "Tableau de bord"], ["his", "Historique"], ["reg", "Réglages du projet"]]
+    .map(([k, l]) => `<button data-a="tab" data-v="${k}" class="${tab === k ? "on" : ""}">${l}</button>`).join("");
+  let body = "";
+  if (tab === "tdb") {
+    const g = {}; p.ops.filter(o => o.type === "dep").forEach(o => g[o.cat] = (g[o.cat] || 0) + o.montant);
+    const rows = Object.entries(g).sort((a, b) => b[1] - a[1]), max = rows.length ? rows[0][1] : 0;
+    const cats = rows.map(([c, v], i) => `<div class="cat"><span>${esc(c)}</span>${bar(v, max, "var(--" + COUL[i % 6] + ")")}<b>${fm(v)}</b></div>`).join("") || '<p class="m">Aucune dépense enregistrée.</p>';
+    const taux = t.rev > 0 ? Math.round(t.epa / t.rev * 100) : 0;
+    body = `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+      <div class="c"><h3>Nouvelle opération</h3>
+        <label>Description</label><input id="o-d" maxlength="80">
+        <label>Montant (FCFA)</label><input id="o-m" inputmode="decimal">
+        <label>Type de flux</label><select id="o-t"><option value="rev">Revenu</option><option value="dep">Dépense</option><option value="epa">Épargne</option></select>
+        <label>Catégorie</label><select id="o-c">${CATS.map(c => `<option>${esc(c)}</option>`).join("")}</select>
+        <label>Date</label><input id="o-dt" type="date" value="${today()}">
+        <p><button class="pri" style="width:100%" data-a="addop">Ajouter l’opération</button></p></div>
+      <div class="c"><h3>Dépenses par catégorie</h3>${cats}</div></div>
+      <div class="grid"><div class="c"><b>Taux d’épargne : ${taux} %</b> <span class="m">(objectif recommandé : 20 % des revenus)</span>${bar(taux, 100, "var(--b)")}</div>
+      <div class="c"><b>Budget dépenses du mois en cours</b>${p.budget > 0 ? bar(depM, p.budget, depM > p.budget ? "var(--r)" : "var(--g)") + `<span class="m">${fm(depM)} / ${fm(p.budget)}${depM > p.budget ? " : budget dépassé" : ""}</span>` : '<p class="m">Fixez un budget mensuel dans « Réglages du projet ».</p>'}</div></div>`;
+  } else if (tab === "his") {
+    const list = p.ops.filter(o => !flt || o.type === flt).sort((a, b) => b.date.localeCompare(a.date));
+    const trs = list.map(o => `<tr><td>${o.date}</td><td>${esc(o.desc)}</td><td>${esc(o.cat)}</td><td style="color:var(--${TYPES[o.type][1]});font-weight:700">${TYPES[o.type][0]}</td><td style="text-align:right">${fm(o.montant)}</td><td><button class="dg" data-a="delop" data-v="${o.id}" style="min-height:32px;padding:4px 10px">Supprimer</button></td></tr>`).join("");
+    body = `<div class="c"><div class="top"><h3>Historique des transactions</h3>
+      <div class="row" style="margin:0"><select id="fl" data-a="flt"><option value="">Tous</option>${Object.entries(TYPES).map(([k, v]) => `<option value="${k}"${flt === k ? " selected" : ""}>${v[0]}</option>`).join("")}</select>
+      <button data-a="csv">Exporter CSV</button></div></div>
+      <div class="m" style="margin-bottom:8px">${list.length} / ${p.ops.length} opération(s) affichée(s)</div>
+      <div class="wt"><table><tr><th>Date</th><th>Description</th><th>Catégorie</th><th>Type</th><th style="text-align:right">Montant</th><th></th></tr>${trs}</table></div></div>`;
+  } else {
+    body = `<div class="c"><h3>Réglages du projet</h3>
+      <label>Nom du projet</label><input id="r-n" value="${esc(p.nom)}" maxlength="40">
+      <label>Budget mensuel de dépenses (FCFA, 0 = aucun)</label><input id="r-b" inputmode="decimal" value="${p.budget || 0}">
+      <label>Objectif d’épargne (FCFA, 0 = aucun)</label><input id="r-o" inputmode="decimal" value="${p.objectif || 0}">
+      <p><button class="pri" data-a="setp">Enregistrer</button> <button class="dg" data-a="delp" data-v="${p.id}">Supprimer ce projet</button></p></div>`;
+  }
+  return `<div class="top"><button data-a="home">Accueil</button><h2 style="margin:0;color:${col}">${esc(p.nom)}</h2><button data-a="theme">${D.theme === "dark" ? "Thème clair" : "Thème sombre"}</button></div>
+    <div class="grid">${tiles}</div><div class="tabs">${tabs}</div>${body}`;
+}
+
+function render() {
+  document.documentElement.dataset.t = D.theme;
+  const p = D.projets.find(x => x.id === cur);
+  if (!p) cur = null;
+  $("#app").innerHTML = p ? vProjet(p) : vHome();
+}
+const proj = () => D.projets.find(x => x.id === cur);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function dl(name, text, mime) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type: mime})); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
+
+const A = {
+  open: v => { cur = v; tab = "tdb"; flt = ""; render(); scrollTo(0, 0); },
+  home: () => { cur = null; render(); },
+  tab: v => { tab = v; render(); },
+  theme: () => { D.theme = D.theme === "dark" ? "light" : "dark"; save(); render(); },
+  flt: () => { flt = $("#fl").value; render(); },
+  newp: () => {
+    const nom = $("#np-n").value.trim();
+    if (!nom) return toast("Donnez un nom à votre projet");
+    D.projets.push({id: uid(), nom, type: KINDS[$("#np-t").value], couleur: +$("#np-c").value, budget: 0, objectif: 0, ops: []});
+    save(); render();
+  },
+  delp: v => {
+    const p = D.projets.find(x => x.id === v);
+    if (p && confirm("Supprimer le projet « " + p.nom + " » et toutes ses opérations ?")) { D.projets = D.projets.filter(x => x.id !== v); cur = null; save(); render(); }
+  },
+  addop: () => {
+    const p = proj(), d = $("#o-d").value.trim(), m = num($("#o-m").value), dt = $("#o-dt").value;
+    if (!d) return toast("Description obligatoire");
+    if (!(m > 0)) return toast("Montant invalide");
+    if (!dt) return toast("Date obligatoire");
+    p.ops.push({id: uid(), date: dt, desc: d, cat: $("#o-c").value, type: $("#o-t").value, montant: m});
+    save(); render(); toast("Opération ajoutée");
+  },
+  delop: v => { const p = proj(); if (confirm("Supprimer cette opération ?")) { p.ops = p.ops.filter(o => o.id !== v); save(); render(); } },
+  setp: () => {
+    const p = proj(), n = $("#r-n").value.trim();
+    if (!n) return toast("Le nom ne peut pas être vide");
+    p.nom = n; p.budget = Math.max(0, num($("#r-b").value) || 0); p.objectif = Math.max(0, num($("#r-o").value) || 0);
+    save(); render(); toast("Réglages enregistrés");
+  },
+  csv: () => {
+    const p = proj(), q = s => '"' + String(s).replace(/"/g, '""') + '"';
+    const rows = p.ops.map(o => [o.date, q(o.desc), q(o.cat), TYPES[o.type][0], o.montant].join(";"));
+    dl(p.nom.replace(/[^\w-]+/g, "_") + ".csv", "\uFEFFDate;Description;Catégorie;Type;Montant\n" + rows.join("\n"), "text/csv;charset=utf-8");
+  },
+  bak: () => dl("finances-pro-sauvegarde-" + today() + ".json", JSON.stringify(D), "application/json"),
+  rst: () => $("#rf").click()
+};
+document.addEventListener("click", e => { const a = e.target.closest("[data-a]"); if (a && a.tagName !== "SELECT" && A[a.dataset.a]) A[a.dataset.a](a.dataset.v); });
+document.addEventListener("change", e => {
+  if (e.target.id === "fl") A.flt();
+  if (e.target.id === "rf" && e.target.files[0]) {
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const j = JSON.parse(r.result);
+        if (!Array.isArray(j.projets)) throw 0;
+        if (confirm("Remplacer toutes vos données actuelles par cette sauvegarde ?")) { D = j; cur = null; save(); render(); toast("Sauvegarde restaurée"); }
+      } catch (x) { toast("Fichier de sauvegarde invalide"); }
+    };
+    r.readAsText(e.target.files[0]);
+  }
+});
+render();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
